@@ -1,0 +1,178 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-surface font-sans text-ink;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-heading;
+  }
+}
+
+@layer components {
+  /* Shared content-block — warm white card, hairline border, gentle lift.
+     `card p-0` / `card p-4` etc. still override the padding. */
+  .card {
+    @apply rounded-xl border border-line bg-surface-lowest p-6 shadow-card;
+  }
+
+  /* Section heading inside a card: Hanken, navy, hairline underline. */
+  .section-title {
+    @apply mb-4 flex items-center gap-2 border-b border-line pb-2 font-heading text-h2 text-navy;
+  }
+
+  /* Identifier / code treatment — mono, tinted chip. */
+  .mono-chip {
+    @apply inline-flex items-center rounded bg-surface-container px-2 py-1 font-mono text-data text-ink-muted;
+  }
+
+  /* Status badges — colour comes from real status, not invented. */
+  .badge {
+    @apply inline-flex items-center gap-1 rounded px-2 py-0.5 text-label;
+  }
+  .badge-success {
+    background-color: rgba(19, 136, 8, 0.1);
+    @apply text-indiagreen-700;
+  }
+  .badge-warning {
+    background-color: rgba(255, 153, 51, 0.14);
+    @apply text-warning-fg;
+  }
+  .badge-critical {
+    background-color: rgba(186, 26, 26, 0.1);
+    @apply text-critical;
+  }
+  .badge-neutral {
+    @apply bg-surface-high text-ink-muted;
+  }
+
+  /* Buttons — one primary (saffron), one outlined (navy), one ghost. */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-1.5 rounded bg-saffron-800 px-4 py-2 text-label text-white transition-colors hover:bg-brown disabled:opacity-50;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-1.5 rounded border border-navy px-4 py-2 text-label text-navy transition-colors hover:bg-surface-low disabled:opacity-50;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-1.5 rounded px-3 py-1.5 text-label text-navy transition-colors hover:bg-navy/5 disabled:opacity-50;
+  }
+
+  /* Text input / select / textarea shared look. */
+  .field {
+    @apply w-full rounded border border-line bg-surface-lowest px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-saffron-800 focus:ring-1 focus:ring-saffron-800/30;
+  }
+}
+
+/* Warm scrollbar to match the surface palette. */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: #d8c2b3;
+  border-radius: 4px;
+}
+
+/* Statutory ticker & ambient animations */
+@keyframes ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-ticker {
+  display: flex;
+  width: max-content;
+  animation: ticker 32s linear infinite;
+}
+
+.animate-ticker:hover {
+  animation-play-state: paused;
+}
+
+@keyframes gradientBorder {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient-border {
+  background-size: 200% 200%;
+  animation: gradientBorder 5s ease infinite;
+}
+
+@keyframes floatOrb {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(15px, -15px) scale(1.06); }
+}
+
+.animate-float-orb {
+  animation: floatOrb 9s ease-in-out infinite;
+}
+
+/* Pure Highlight Interactions: No tilt, no movement, pure visual highlight */
+.card,
+.stat-card,
+.bidder-card {
+  position: relative;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.card:hover,
+.stat-card:hover,
+.bidder-card:hover {
+  border-color: rgba(0, 0, 128, 0.38);
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 128, 0.08), 0 0 0 1px rgba(0, 0, 128, 0.08);
+  background-color: #ffffff;
+}
+
+/* Bidder Directory row: pure highlight */
+.bidder-row {
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+}
+
+.bidder-row:hover {
+  background-color: rgba(0, 0, 128, 0.035);
+  box-shadow: inset 3.5px 0 0 0 #000080;
+}
+
+.bidder-row:active {
+  background-color: rgba(0, 0, 128, 0.06);
+}
+
+/* Pending Bidder Item: pure highlight */
+.bidder-item {
+  transition: border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.bidder-item:hover {
+  border-color: rgba(0, 0, 128, 0.4);
+  background-color: rgba(0, 0, 128, 0.025);
+  box-shadow: 0 2px 8px -1px rgba(0, 0, 128, 0.08);
+}
+
+.bidder-item:active {
+  background-color: rgba(0, 0, 128, 0.05);
+}
+
+/* Micro-press physics on interactive elements */
+button:active,
+a.card:active,
+.btn-primary:active,
+.btn-secondary:active,
+.btn-ghost:active,
+input[type='checkbox']:active,
+input[type='radio']:active {
+  transform: scale(0.985);
+  transition: transform 0.08s ease;
+}

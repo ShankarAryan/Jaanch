@@ -1,0 +1,235 @@
+// GeM Bid Compliance Verification Platform - data model
+// Postgres (Supabase). DATABASE_URL is the transaction-mode pooler
+// (pgbouncer, port 6543); DIRECT_URL is the session-mode pooler (port 5432)
+// that Prisma uses for `db push` / migrations.
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Tender {
+  id           String                  @id @default(cuid())
+  referenceNo  String                  @unique
+  title        String
+  organization String
+  department   String
+  category     String
+  // Real bid facts, shown on the dashboard so the platform reflects the
+  // actual tender rather than generic assumptions.
+  documentDated DateTime? // the bid document's "Dated" field (issue date), as published
+  bidEndsAt    DateTime? // bid closing date/time
+  emdRequired  Boolean   @default(true)
+  emdNote      String? // EMD / ePBG detail (amount, bank, duration) as published
+  miiNote      String? // Make in India preference status for this tender
+  mseNote      String? // MSE purchase-preference terms for this tender
+  createdAt    DateTime                @default(now())
+  requirements ComplianceRequirement[]
+  bidders      Bidder[]
+
+  // Set when this tender came from a dataset file imported via /admin/import.
+  // null for the originally-seeded tenders.
+  importBatchId String?
+  importBatch   ImportBatch? @relation(fields: [importBatchId], references: [id])
+
+  @@index([importBatchId])
+}
+
+// One row per dataset file processed through /admin/import. The file bytes
+// stay in the "dataset-uploads" Supabase Storage bucket - this row only
+// records the provenance (which file, when, by whom, what it produced).
+model ImportBatch {
+  id             String   @id @default(cuid())
+  filename       String
+  storagePath    String // path within the "dataset-uploads" Supabase Storage bucket
+  mimeType       String
+  mode           String // 'add' | 'replace-all'
+  processedBy    String
+  processedAt    DateTime @default(now())
+  recordsCreated Int
+  summary        String?
+  // Set by cascadeDeleteImport when this import's source file was removed from
+  // Storage and its bidders were auto-reverted. The row is kept as history;
+  // once this is non-null the storagePath no longer counts as "already
+  // imported", so re-uploading a file under the same name imports fresh.
+  revertedAt     DateTime?
+  tenders        Tender[]
+  bidders        Bidder[]
+}
+
+// One row per statutory/eligibility check a tender requires.
+// ruleConfig is tender-specific and holds the thresholds the rules engine
+// evaluates against (e.g. minimum local content %, max GST filing delay).
+model ComplianceRequirement {
+  id         String   @id @default(cuid())
+  tenderId   String
+  tender     Tender   @relation(fields: [tenderId], references: [id])
+  code       String // e.g. "UDYAM_STATUS", "GST_FILING", "MAKE_IN_INDIA_LOCAL_CONTENT"
+  label      String
+  sourceType String // provider key: udyam | gst | pan | blacklist | makeInIndia | mca21 | epfoEsic | nsic | startupIndia | oemAuthorization | digilocker
+  mandatory  Boolean  @default(true)
+  ruleConfig String // JSON string of rule parameters
+  createdAt  DateTime @default(now())
+
+  @@index([tenderId])
+}
+
+model Bidder {
+  id                     String                @id @default(cuid())
+  tenderId               String
+  tender                 Tender                @relation(fields: [tenderId], references: [id])
+  // Set only for bidders created from a spreadsheet import (commit.ts records
+  // path). Lets the auto-import watcher offer a confirm-before-delete cascade
+  // when the source file is removed from Storage. onDelete: SetNull - deleting
+  // an ImportBatch never blocks on or cascade-fails a bidder.
+  importBatchId          String?
+  importBatch            ImportBatch?          @relation(fields: [importBatchId], references: [id], onDelete: SetNull)
+  key                    String                @unique // per-tender-row slug (e.g. sentinel-imaging-t8), joins demo fixture data
+  companySlug            String                @default("") // stable per-company identity across tenders (e.g. sentinel-imaging); the Bidder sign-in scope
+  name                   String
+  udyamNumber            String?
+  gstin                  String?
+  pan                    String?
+  cin                    String?
+  claimedTurnoverInrLakh Float?
+  claimedEmployeeCount   Int?
+  createdAt              DateTime              @default(now())
+  documents              Document[]
+  verificationResults    VerificationResult[]
+  scores                 Score[]
+  decisions              Decision[]
+  auditLogs              AuditLog[]
+
+  @@index([tenderId])
+}
+
+// Uploaded bidder documents. A document arrives one of two ways:
+//   - seeded with rawText only, simulating the output of an OCR step
+//     (real deployment would run OCR first, then feed rawText in), or
+//   - a real file upload (fileData + mimeType), which the AI extraction
+//     step reads directly via a multimodal Claude call - no separate OCR.
+// Either way the extraction module's contract is the same.
+model Document {
+  id            String   @id @default(cuid())
+  bidderId      String
+  bidder        Bidder   @relation(fields: [bidderId], references: [id])
+  docType       String // e.g. LOCAL_CONTENT_CERTIFICATE, OEM_AUTHORIZATION_LETTER, GST_RETURN_ACK
+  fileName      String
+  mimeType      String? // set for real uploads: application/pdf | image/png | image/jpeg | image/webp
+  fileData      Bytes? // raw uploaded file bytes; null for seeded (OCR-text-only) documents
+  rawText       String? // simulated/real OCR text the AI extraction step reads when there is no fileData
+  extractedData String? // JSON string produced by the AI extraction step
+  uploadedAt    DateTime @default(now())
+
+  @@index([bidderId])
+}
+
+model VerificationResult {
+  id              String   @id @default(cuid())
+  bidderId        String
+  bidder          Bidder   @relation(fields: [bidderId], references: [id])
+  requirementCode String
+  sourceType      String
+  status          String // VERIFIED_OK | VERIFIED_FAIL | INCONSISTENT | MISSING | ERROR
+  confidence      Float    @default(1.0)
+  rawResponse     String // JSON string of provider response
+  isMock          Boolean  @default(true)
+  method          String   @default("simulated") // real | real+simulated | simulated | sandbox-probe
+  checkedAt       DateTime @default(now())
+
+  @@index([bidderId])
+}
+
+model Score {
+  id               String   @id @default(cuid())
+  bidderId         String
+  bidder           Bidder   @relation(fields: [bidderId], references: [id])
+  complianceScore  Float
+  riskLevel        String // LOW | MEDIUM | HIGH
+  breakdown        String // JSON string: per-requirement evaluation detail
+  aiRecommendation String
+  computedAt       DateTime @default(now())
+
+  @@index([bidderId])
+}
+
+// The Procurement Officer's final call. Always separate from the AI output -
+// the system never auto-decides.
+model Decision {
+  id          String   @id @default(cuid())
+  bidderId    String
+  bidder      Bidder   @relation(fields: [bidderId], references: [id])
+  officerName String
+  outcome     String // QUALIFIED | DISQUALIFIED | CONDITIONAL
+  remarks     String?
+  decidedAt   DateTime @default(now())
+
+  @@index([bidderId])
+}
+
+// Immutable trail of every check and decision, for auditability.
+model AuditLog {
+  id        String   @id @default(cuid())
+  bidderId  String?
+  bidder    Bidder?  @relation(fields: [bidderId], references: [id])
+  actor     String // SYSTEM | AI_ENGINE | <officer name>
+  action    String
+  details   String // JSON string
+  createdAt DateTime @default(now())
+
+  @@index([bidderId])
+}
+
+// --- Simulated government registries, as real DB tables --------------------
+// The "fixed dataset" every mandatory check verifies bidder-declared and
+// uploaded-document values against. Lives in Supabase Postgres (not in code)
+// so it's visible and editable directly from the Supabase dashboard's Table
+// Editor. Seeded from src/lib/fixtures/registryFixtures.ts by
+// scripts/seedRegistries.ts - see that file for how to (re)populate it.
+
+model RegistryPan {
+  pan            String @id // the PAN itself, e.g. "AAACC1206D"
+  holderName     String
+  panStatus      String // Valid | Invalid | Deactivated
+  itFilingStatus String // Filed | NotFiled
+}
+
+model RegistryGst {
+  gstin                   String @id
+  legalName               String
+  status                  String // Active | Cancelled | Suspended
+  lastReturnPeriod        String // e.g. "2026-08"
+  returnFilingDelayMonths Int
+}
+
+model RegistryUdyam {
+  udyamNumber    String   @id
+  enterpriseName String
+  category       String // Micro | Small | Medium
+  status         String // Active | Cancelled
+  registeredOn   DateTime
+}
+
+model RegistryBlacklist {
+  id            String   @id @default(cuid())
+  matchValue    String // pan, gstin, or name fragment
+  matchField    String // pan | gstin | name
+  reason        String
+  debarredUntil DateTime
+}
+
+model RegistryDpiitLocalContent {
+  // Compound key `${companySlug}@${tender.referenceNo}` (or just
+  // companySlug for a single-tender company) - matches what
+  // makeInIndia.ts looks up with. Kept as a plain string id rather than a
+  // relation so this table stays self-contained and editable from the
+  // Supabase dashboard without a Tender row needing to exist first.
+  key                         String @id
+  verifiedLocalContentPercent Int
+  certifyingAgency            String
+}

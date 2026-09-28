@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GeM Bid Compliance Verification Platform | Jaanch</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%23000080'/><path d='M16 6 L26 24 L6 24 Z' fill='%23FF9933'/></svg>">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #fbf9f5;
+    }
+    .top-strip {
+      height: 3px;
+      display: flex;
+      width: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
+    }
+    .strip-orange { flex: 1; background: #FF9933; }
+    .strip-white { flex: 1; background: #ffffff; }
+    .strip-green { flex: 1; background: #138808; }
+    
+    .header-bar {
+      position: fixed;
+      top: 3px;
+      left: 0;
+      right: 0;
+      height: 44px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid #e7ded5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 99;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #000080;
+    }
+    .badge-live {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-size: 10px;
+      font-weight: 600;
+      color: #138808;
+      background: rgba(19, 136, 8, 0.12);
+    }
+    .badge-live::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #138808;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.2); }
+    }
+    .links {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn {
+      font-size: 11px;
+      font-weight: 600;
+      text-decoration: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .btn-officer {
+      background: #78350f;
+      color: white;
+      box-shadow: 0 1px 3px rgba(120,53,15,0.3);
+    }
+    .btn-officer:hover {
+      background: #5b270a;
+    }
+    .btn-bidder {
+      background: #000080;
+      color: white;
+    }
+    .btn-bidder:hover {
+      background: #000060;
+    }
+    .btn-open {
+      background: #138808;
+      color: white;
+    }
+    .btn-open:hover {
+      background: #0e6306;
+    }
+    
+    #app-frame {
+      width: 100%;
+      height: calc(100vh - 47px);
+      margin-top: 47px;
+      border: none;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-strip">
+    <div class="strip-orange"></div>
+    <div class="strip-white"></div>
+    <div class="strip-green"></div>
+  </div>
+
+  <header class="header-bar">
+    <div class="brand">
+      <svg width="20" height="20" viewBox="0 0 32 32" fill="none">
+        <rect width="32" height="32" rx="6" fill="#000080"/>
+        <path d="M16 6 L26 24 L6 24 Z" fill="#FF9933"/>
+        <circle cx="16" cy="18" r="3" fill="#ffffff"/>
+      </svg>
+      <span>Jaanch · GeM Compliance Verification Platform (SIH 2026)</span>
+      <span class="badge-live">ALL MODULES VERIFIED & LIVE</span>
+    </div>
+
+    <div class="links">
+      <a href="https://sally-rebecca-deployment-vaccine.trycloudflare.com/demo-login?role=officer" target="_blank" class="btn btn-officer">
+        ⚡ Officer Console (1-Click)
+      </a>
+      <a href="https://sally-rebecca-deployment-vaccine.trycloudflare.com/demo-login?role=viewer" target="_blank" class="btn btn-bidder">
+        🔍 Audit Desk
+      </a>
+      <a href="https://sally-rebecca-deployment-vaccine.trycloudflare.com" target="_blank" class="btn btn-open">
+        🚀 Launch Full App (New Tab)
+      </a>
+    </div>
+  </header>
+
+  <iframe 
+    id="app-frame" 
+    src="https://sally-rebecca-deployment-vaccine.trycloudflare.com/dashboard"
+    allow="clipboard-read; clipboard-write"
+  ></iframe>
+
+  <script>
+    function toggleFullScreen() {
+      const frame = document.getElementById('app-frame');
+      const header = document.querySelector('.header-bar');
+      if (header.style.display === 'none') {
+        header.style.display = 'flex';
+        frame.style.height = 'calc(100vh - 47px)';
+        frame.style.marginTop = '47px';
+      } else {
+        header.style.display = 'none';
+        frame.style.height = '100vh';
+        frame.style.marginTop = '0';
+      }
+    }
+  </script>
+</body>
+</html>

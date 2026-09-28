@@ -1,0 +1,45 @@
+{
+  "name": "gem-compliance-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI-powered integrated bid compliance verification platform for GeM procurement (SIH26100 - CPCL)",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "seed": "tsx prisma/seed.ts",
+    "ai:check": "tsx scripts/check-ai.ts",
+    "test": "tsx --test src/lib/**/*.test.ts",
+    "setup": "npm install && npx prisma generate && npm run db:push && npm run seed"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "@prisma/client": "^5.20.0",
+    "@supabase/supabase-js": "^2.116.0",
+    "adm-zip": "^0.6.0",
+    "next": "14.2.15",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "server-only": "^0.0.1",
+    "xlsx": "^0.18.5",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "^0.5.8",
+    "@types/node": "^20.14.10",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.39",
+    "prisma": "^5.20.0",
+    "tailwindcss": "^3.4.6",
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.3"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  }
+}
