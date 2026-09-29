@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jaanch (जाँच) — GeM Bid Compliance Verification Platform</title>
+  <meta name="description" content="AI-Powered Integrated Bid Compliance Verification Platform for Government e-Marketplace (GeM) Procurement. Smart India Hackathon 2026 (SIH26100 - CPCL).">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Mermaid.js for Architecture Flowchart -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+
+  <style>
+    :root {
+      --navy-950: #060c18;
+      --navy-900: #0a1426;
+      --navy-800: #10203e;
+      --navy-700: #182e56;
+      --saffron-500: #ff9933;
+      --saffron-600: #e67e1a;
+      --india-green: #138808;
+      --india-green-glow: rgba(19, 136, 8, 0.25);
+      --critical-red: #ef4444;
+      --warning-amber: #f59e0b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-faint: #64748b;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --card-bg: rgba(16, 32, 62, 0.65);
+      --card-border: rgba(255, 255, 255, 0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: radial-gradient(circle at 50% 0%, #132448 0%, var(--navy-950) 65%);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Tiranga Top Strip */
+    .tiranga-strip {
+      height: 3.5px;
+      width: 100%;
+      display: flex;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .strip-saffron { flex: 1; background: var(--saffron-500); }
+    .strip-white { flex: 1; background: #ffffff; }
+    .strip-green { flex: 1; background: var(--india-green); }
+
+    /* Navigation */
+    nav {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-subtle);
+      background: rgba(6, 12, 24, 0.7);
+      backdrop-filter: blur(14px);
+      position: sticky;
+      top: 3.5px;
+      z-index: 90;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .gem-emblem {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #000080, #1e3a8a);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #fff;
+      font-size: 14px;
+      border: 1px solid rgba(255, 153, 51, 0.4);
+      box-shadow: 0 4px 12px rgba(0, 0, 128, 0.4);
+    }
+
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-title span.hindi {
+      color: var(--saffron-500);
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .brand-subtitle {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      color: #e2e8f0;
+      border: 1px solid var(--border-subtle);
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--saffron-500) 0%, var(--saffron-600) 100%);
+      color: #0b1120;
+      font-weight: 700;
+      border: none;
+      box-shadow: 0 4px 14px rgba(255, 153, 51, 0.35);
+    }
+    .btn-primary:hover {
+      box-shadow: 0 6px 20px rgba(255, 153, 51, 0.5);
+      transform: translateY(-1px);
+    }
+
+    /* Hero Section */
+    .hero {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 64px 24px 40px;
+      text-align: center;
+    }
+
+    .badge-sih {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 9999px;
+      background: rgba(255, 153, 51, 0.12);
+      border: 1px solid rgba(255, 153, 51, 0.3);
+      color: var(--saffron-500);
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      letter-spacing: 0.03em;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.2rem, 5vw, 3.6rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 18px;
+      background: linear-gradient(180deg, #ffffff 40%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      max-width: 780px;
+      margin: 0 auto 32px;
+      font-size: 1.1rem;
+      color: var(--text-muted);
+    }
+
+    .officer-callout {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 20px;
+      border-radius: 12px;
+      background: rgba(19, 136, 8, 0.1);
+      border: 1px solid rgba(19, 136, 8, 0.3);
+      color: #4ade80;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 40px;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 10px #22c55e;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.2); }
+    }
+
+    /* Interactive Verification Sandbox */
+    .sandbox-section {
+      max-width: 1240px;
+      margin: 0 auto 64px;
+      padding: 0 24px;
+    }
+
+    .sandbox-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(16px);
+    }
+
+    .sandbox-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .sandbox-header h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .bidder-selector {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .bidder-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .bidder-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .bidder-btn.active {
+      background: var(--saffron-500);
+      color: #0b1120;
+      border-color: var(--saffron-500);
+      font-weight: 700;
+      box-shadow: 0 2px 10px rgba(255, 153, 51, 0.3);
+    }
+
+    /* Sandbox Grid */
+    .sandbox-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+    }
+
+    @media (max-width: 900px) {
+      .sandbox-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Verification Pipeline Panel */
+    .pipeline-panel {
+      background: rgba(10, 20, 38, 0.7);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 24px;
+    }
+
+    .tier-step {
+      margin-bottom: 18px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .tier-step:last-child { margin-bottom: 0; padding-bottom: 0; border: none; }
+
+    .tier-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--saffron-500);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .tier-badge {
+      font-size: 0.72rem;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .badge-pass { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+    .badge-fail { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+    .check-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      font-size: 0.85rem;
+      color: #e2e8f0;
+    }
+
+    .check-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* Score Card */
+    .score-panel {
+      background: rgba(10, 20, 38, 0.85);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      justify-content: space-between;
+    }
+
+    .gauge-circle {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: conic-gradient(#22c55e calc(var(--score-pct) * 1%), rgba(255, 255, 255, 0.08) 0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 16px 0;
+      position: relative;
+      box-shadow: 0 0 30px rgba(34, 197, 94, 0.2);
+    }
+
+    .gauge-inner {
+      width: 112px;
+      height: 112px;
+      border-radius: 50%;
+      background: #0a1426;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .gauge-score {
+      font-size: 2.2rem;
+      font-weight: 800;
+      line-height: 1;
+      color: #fff;
+    }
+
+    .gauge-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .verdict-box {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-top: 14px;
+    }
+
+    .verdict-qualify {
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+    .verdict-disqualify {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    /* Architecture Flowchart Section */
+    .flowchart-section {
+      max-width: 1240px;
+      margin: 0 auto 64px;
+      padding: 0 24px;
+    }
+
+    .flowchart-card {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 28px;
+      color: #0f172a;
+      box-shadow: 0 24px 50px rgba(0, 0, 0, 0.5);
+      overflow-x: auto;
+    }
+
+    .flowchart-title {
+      color: #000080;
+      font-size: 1.25rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .flowchart-subtitle {
+      color: #64748b;
+      font-size: 0.85rem;
+      margin-bottom: 20px;
+    }
+
+    /* Features Grid */
+    .features-section {
+      max-width: 1240px;
+      margin: 0 auto 64px;
+      padding: 0 24px;
+    }
+
+    .features-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .features-header h2 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .feature-box {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px;
+      transition: all 0.2s;
+    }
+    .feature-box:hover {
+      border-color: rgba(255, 153, 51, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .feature-icon {
+      font-size: 1.8rem;
+      margin-bottom: 14px;
+    }
+
+    .feature-box h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+
+    .feature-box p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-subtle);
+      background: rgba(6, 12, 24, 0.9);
+      padding: 40px 24px;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    footer a { color: var(--saffron-500); text-decoration: none; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Indian Flag Accent Strip -->
+  <div class="tiranga-strip">
+    <div class="strip-saffron"></div>
+    <div class="strip-white"></div>
+    <div class="strip-green"></div>
+  </div>
+
+  <!-- Navigation -->
+  <nav>
+    <div class="brand-group">
+      <div class="gem-emblem">GeM</div>
+      <div>
+        <div class="brand-title">Jaanch <span class="hindi">(जाँच)</span></div>
+        <div class="brand-subtitle">Bid Compliance Verification Platform</div>
+      </div>
+    </div>
+    <div class="nav-actions">
+      <a href="#demo" class="btn btn-secondary">⚡ Live Demo Sandbox</a>
+      <a href="#architecture" class="btn btn-secondary">📊 Architecture Flow</a>
+      <a href="https://github.com/ShankarAryan/Jaanch" target="_blank" class="btn btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        GitHub Repository
+      </a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="badge-sih">
+      🇮🇳 SMART INDIA HACKATHON 2026 · PROBLEM SIH26100 (CPCL)
+    </div>
+    <h1>AI-Powered Statutory Bid Compliance Verification</h1>
+    <p>
+      An automated, multi-tiered verification engine for the Government e-Marketplace (GeM). Eliminates manual tender evaluation delays, validates GSTIN/PAN checksums in sub-milliseconds, and verifies statutory documents with multimodal AI vision.
+    </p>
+    <div class="officer-callout">
+      <div class="pulse-dot"></div>
+      <span>Active Evaluation Console · Procurement Officer: <strong>K. Shankar Aryan</strong> (CPCL Evaluation Cell)</span>
+    </div>
+  </section>
+
+  <!-- Interactive Sandbox -->
+  <section class="sandbox-section" id="demo">
+    <div class="sandbox-card">
+      <div class="sandbox-header">
+        <h2>
+          <span>⚡ Interactive Compliance Engine Simulator</span>
+        </h2>
+        <div class="bidder-selector">
+          <button class="bidder-btn active" onclick="loadBidder(0)">1. Chennai Industrial (Pass)</button>
+          <button class="bidder-btn" onclick="loadBidder(1)">2. Swift Healthcare (GST Fail)</button>
+          <button class="bidder-btn" onclick="loadBidder(2)">3. Novatech Dynamics (PAN Fail)</button>
+          <button class="bidder-btn" onclick="loadBidder(3)">4. Apex Medtech (MII Class-I)</button>
+        </div>
+      </div>
+
+      <div class="sandbox-grid">
+        <!-- Pipeline Status -->
+        <div class="pipeline-panel">
+          
+          <div class="tier-step">
+            <div class="tier-title">
+              <span>Tier 1 · Deterministic Math & AST Check</span>
+              <span class="tier-badge" id="t1-badge">PASS</span>
+            </div>
+            <div class="check-row">
+              <span>GSTIN Luhn Mod-36 Checksum</span>
+              <span class="check-val" id="t1-gstin">33AAACB2211C1ZG (Valid State 33 - TN)</span>
+            </div>
+            <div class="check-row">
+              <span>Income Tax PAN AST Syntax</span>
+              <span class="check-val" id="t1-pan">AAACB2211C (Entity: Company)</span>
+            </div>
+          </div>
+
+          <div class="tier-step">
+            <div class="tier-title">
+              <span>Tier 2 · Multimodal AI Vision (Gemini 1.5)</span>
+              <span class="tier-badge" id="t2-badge">VERIFIED</span>
+            </div>
+            <div class="check-row">
+              <span>OEM Authorization Letter</span>
+              <span class="check-val" id="t2-oem">Matching Tender GEM/2026/B/8090512</span>
+            </div>
+            <div class="check-row">
+              <span>Local Content (Make in India)</span>
+              <span class="check-val" id="t2-mii">Declared: 65% (Meets Class-I threshold &gt;50%)</span>
+            </div>
+          </div>
+
+          <div class="tier-step">
+            <div class="tier-title">
+              <span>Tier 3 · External Registry Stubs</span>
+              <span class="tier-badge" id="t3-badge">CLEAN</span>
+            </div>
+            <div class="check-row">
+              <span>National Debarment / Blacklist</span>
+              <span class="check-val" id="t3-debarment">No adverse record found</span>
+            </div>
+            <div class="check-row">
+              <span>DigiLocker Cryptographic Match</span>
+              <span class="check-val" id="t3-digilocker">SHA-256 Digest Verified</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Score & Adjudication -->
+        <div class="score-panel" id="score-card">
+          <div>
+            <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 700;">Composite Score</span>
+            <div class="gauge-circle" id="gauge" style="--score-pct: 98;">
+              <div class="gauge-inner">
+                <div class="gauge-score" id="score-num">98</div>
+                <div class="gauge-label">out of 100</div>
+              </div>
+            </div>
+            <div style="font-size: 0.85rem; font-weight: 700; color: #4ade80;" id="risk-tier">🟢 LOW RISK</div>
+          </div>
+
+          <div class="verdict-box verdict-qualify" id="verdict-box">
+            ✅ QUALIFIED FOR TECHNICAL BID
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Architecture Flowchart Preview -->
+  <section class="flowchart-section" id="architecture">
+    <div class="flowchart-card">
+      <div class="flowchart-title">
+        <span>📊 Technical Architecture Dataflow (Right-to-Left Layout)</span>
+        <span style="font-size: 0.75rem; background: #e0f2fe; color: #0284c7; padding: 4px 10px; border-radius: 9999px;">PPT SLIDE FORMAT</span>
+      </div>
+      <div class="flowchart-subtitle">
+        Client &amp; Ingestion on the right flowing through the 3-Tier Verification Core to the Rules Engine &amp; Persistence on the left.
+      </div>
+      <pre class="mermaid">
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'fontFamily': 'Plus Jakarta Sans, sans-serif',
+    'fontSize': '12px',
+    'primaryColor': '#ffffff',
+    'primaryBorderColor': '#2563eb',
+    'primaryTextColor': '#0f172a',
+    'lineColor': '#475569',
+    'tertiaryColor': '#f8fafc'
+  }
+}}%%
+flowchart RL
+    subgraph S3["3. Rules & Risk Scoring"]
+        direction TB
+        RULES["⚖️ Deterministic Rules Matrix<br/><code>MET • NOT_MET • NEEDS_REVIEW</code>"]
+        SCORE["📊 Scoring & Risk Matrix<br/><code>0–100 Weighted Score • Risk Tiers</code>"]
+        DECIDE["👨‍⚖️ Officer Adjudication (HITL)<br/><code>Qualify / Disqualify Verdict</code>"]
+        OUTPUT["📋 Verified Bid Compliance Dossier<br/><code>Final Tender Evaluation Report</code>"]
+
+        RULES -->|"Rule Verdicts"| SCORE
+        SCORE -->|"Risk Summary"| DECIDE
+        DECIDE -->|"Publish"| OUTPUT
+    end
+
+    subgraph S4["4. Persistence & Audit Trail"]
+        direction TB
+        DB[("🗄️ PostgreSQL Database<br/><code>Prisma ORM (TCP Pool)</code>")]
+        S3STORE[("☁️ Supabase Object Storage<br/><code>S3 Multipart API</code>")]
+        AUDIT["📜 Immutable Audit Trail<br/><code>State Diff & Timestamped Logs</code>"]
+
+        DB <-->|"Store & Query"| AUDIT
+    end
+
+    subgraph S2["2. Verification Orchestrator"]
+        direction TB
+        ORCH["⚙️ Pipeline Orchestrator<br/><code>src/lib/orchestrator.ts</code>"]
+        T1["🔍 Tier 1: Deterministic Engine<br/><code>Luhn Mod-36 Checksum • PAN AST</code>"]
+        T2["🤖 Tier 2: Multimodal AI Vision<br/><code>HTTPS REST / JSON (Gemini 1.5)</code>"]
+        T3["🌐 Tier 3: External Registry Stubs<br/><code>OAuth 2.0 / REST (DigiLocker)</code>"]
+
+        ORCH -->|"In-Memory Calc"| T1
+        ORCH -->|"REST API Call"| T2
+        ORCH -->|"Bearer Token"| T3
+    end
+
+    subgraph S1["1. Client & Gateway Layer"]
+        direction TB
+        USER["👤 Officer / Bidder Client<br/><code>HTTPS / TLS 1.3 Session</code>"]
+        AUTH["🛡️ Session Middleware<br/><code>HMAC-SHA256 Signed Cookie & RBAC</code>"]
+        ACTION["⚡ Server Actions Dispatcher<br/><code>HTTP POST (RPC Protocol)</code>"]
+        UPLOAD["📦 Multipart Ingestion<br/><code>multipart/form-data (PDF/Image)</code>"]
+
+        USER -->|"POST JSON / Cookies"| AUTH
+        AUTH -->|"Authorized Context"| ACTION
+        ACTION -->|"Stream Document Bytes"| UPLOAD
+    end
+
+    ACTION -->|"Trigger Verification"| ORCH
+    UPLOAD -->|"PutObject"| S3STORE
+    T1 & T2 & T3 -->|"Normalized JSON"| RULES
+    SCORE -->|"Prisma SQL Write"| DB
+    SCORE -->|"Log Events"| AUDIT
+    DECIDE -->|"Record Decision Log"| AUDIT
+
+    classDef client fill:#eff6ff,stroke:#1d4ed8,stroke-width:1.5px,color:#1e3a8a;
+    classDef engine fill:#fefce8,stroke:#ca8a04,stroke-width:1.5px,color:#713f12;
+    classDef rules fill:#f0fdf4,stroke:#16a34a,stroke-width:1.5px,color:#14532d;
+    classDef store fill:#f5f3ff,stroke:#7c3aed,stroke-width:1.5px,color:#4c1d95;
+
+    class USER,AUTH,ACTION,UPLOAD client;
+    class ORCH,T1,T2,T3 engine;
+    class RULES,SCORE,DECIDE,OUTPUT rules;
+    class DB,S3STORE,AUDIT store;
+      </pre>
+    </div>
+  </section>
+
+  <!-- Features Grid -->
+  <section class="features-section">
+    <div class="features-header">
+      <h2>Engine Capabilities</h2>
+      <p style="color: var(--text-muted);">Purpose-built for public procurement evaluation standards</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-box">
+        <div class="feature-icon">⚡</div>
+        <h3>Sub-Millisecond Luhn AST</h3>
+        <p>Validates 15-character GSTINs using ISO/IEC 7064 Mod 36,36 checksum algorithms in 0.4ms before any API calls are made.</p>
+      </div>
+      <div class="feature-box">
+        <div class="feature-icon">🤖</div>
+        <h3>Multimodal Vision OCR</h3>
+        <p>Extracts unstructured and scanned PDF documents using Gemini 1.5 Flash Vision to cross-correlate tender serials and OEM seals.</p>
+      </div>
+      <div class="feature-box">
+        <div class="feature-icon">🌐</div>
+        <h3>Government Registry Stubs</h3>
+        <p>Simulates real-time DigiLocker cryptographic document hashes, MCA21 corporate identity numbers, and national debarment registries.</p>
+      </div>
+      <div class="feature-box">
+        <div class="feature-icon">📜</div>
+        <h3>Immutable Audit Trail</h3>
+        <p>Every officer decision, document upload, and rule override is cryptographically logged with state diffs and timestamps.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>
+      <strong>Jaanch (जाँच)</strong> — Built for the <strong>Smart India Hackathon 2026</strong>.
+    </p>
+    <p style="margin-top: 6px;">
+      Problem ID: SIH26100 (Ministry of Petroleum &amp; Natural Gas / CPCL) · 
+      <a href="https://github.com/ShankarAryan/Jaanch" target="_blank">View GitHub Repository</a>
+    </p>
+  </footer>
+
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: 'base' });
+
+    const bidders = [
+      {
+        t1Badge: "PASS", t1BadgeClass: "badge-pass",
+        gstin: "33AAACB2211C1ZG (Valid State 33 - Tamil Nadu)",
+        pan: "AAACB2211C (Entity: Company · Checksum Valid)",
+        t2Badge: "VERIFIED", t2BadgeClass: "badge-pass",
+        oem: "Matching Tender GEM/2026/B/8090512",
+        mii: "Declared: 65% (Meets Class-I threshold >50%)",
+        t3Badge: "CLEAN", t3BadgeClass: "badge-pass",
+        debarment: "No adverse record found in GeM Blacklist",
+        digilocker: "SHA-256 Digest Verified & Matched",
+        score: 98,
+        risk: "🟢 LOW RISK",
+        riskColor: "#4ade80",
+        gaugeColor: "#22c55e",
+        verdictText: "✅ QUALIFIED FOR TECHNICAL BID",
+        verdictClass: "verdict-qualify"
+      },
+      {
+        t1Badge: "FAIL", t1BadgeClass: "badge-fail",
+        gstin: "33AAACB2211C1Z0 (Checksum mismatch · Invalid Luhn)",
+        pan: "AAACB2211C (Entity: Company)",
+        t2Badge: "FLAGGED", t2BadgeClass: "badge-fail",
+        oem: "Mismatched OEM serial number",
+        mii: "Declared: 40% (Below Class-I threshold)",
+        t3Badge: "CLEAN", t3BadgeClass: "badge-pass",
+        debarment: "No adverse record found",
+        digilocker: "Document modified post issuance",
+        score: 42,
+        risk: "🔴 HIGH RISK",
+        riskColor: "#ef4444",
+        gaugeColor: "#ef4444",
+        verdictText: "❌ DEFICIENT / NON-COMPLIANT",
+        verdictClass: "verdict-disqualify"
+      },
+      {
+        t1Badge: "FAIL", t1BadgeClass: "badge-fail",
+        gstin: "27AABCN8890K1ZV (Valid State 27 - MH)",
+        pan: "AABCN88909 (Syntax Error: 10th char must be letter)",
+        t2Badge: "UNVERIFIED", t2BadgeClass: "badge-fail",
+        oem: "OEM Authorization Missing Authorized Signatory",
+        mii: "No Make-in-India declaration provided",
+        t3Badge: "DEBARRED", t3BadgeClass: "badge-fail",
+        debarment: "ACTIVE DEBARMENT: CVC Notice 2025/11",
+        digilocker: "No DigiLocker record found",
+        score: 12,
+        risk: "⛔ CRITICAL RISK",
+        riskColor: "#ef4444",
+        gaugeColor: "#ef4444",
+        verdictText: "⛔ DISQUALIFIED · DEBARRED ENTITY",
+        verdictClass: "verdict-disqualify"
+      },
+      {
+        t1Badge: "PASS", t1BadgeClass: "badge-pass",
+        gstin: "33AABCA4321A1ZB (Valid State 33 - TN)",
+        pan: "AABCA4321A (Entity: Company · Checksum Valid)",
+        t2Badge: "VERIFIED", t2BadgeClass: "badge-pass",
+        oem: "Direct Manufacturer (OEM Exemption Applicable)",
+        mii: "Declared: 78% (Class-I Local Supplier)",
+        t3Badge: "CLEAN", t3BadgeClass: "badge-pass",
+        debarment: "No adverse record found",
+        digilocker: "ISO 9001:2015 & Udyam Verified",
+        score: 95,
+        risk: "🟢 LOW RISK",
+        riskColor: "#4ade80",
+        gaugeColor: "#22c55e",
+        verdictText: "✅ QUALIFIED FOR TECHNICAL BID",
+        verdictClass: "verdict-qualify"
+      }
+    ];
+
+    function loadBidder(idx) {
+      document.querySelectorAll('.bidder-btn').forEach((b, i) => {
+        b.classList.toggle('active', i === idx);
+      });
+      const d = bidders[idx];
+      
+      const t1b = document.getElementById('t1-badge');
+      t1b.textContent = d.t1Badge;
+      t1b.className = 'tier-badge ' + d.t1BadgeClass;
+
+      document.getElementById('t1-gstin').textContent = d.gstin;
+      document.getElementById('t1-pan').textContent = d.pan;
+
+      const t2b = document.getElementById('t2-badge');
+      t2b.textContent = d.t2Badge;
+      t2b.className = 'tier-badge ' + d.t2BadgeClass;
+
+      document.getElementById('t2-oem').textContent = d.oem;
+      document.getElementById('t2-mii').textContent = d.mii;
+
+      const t3b = document.getElementById('t3-badge');
+      t3b.textContent = d.t3Badge;
+      t3b.className = 'tier-badge ' + d.t3BadgeClass;
+
+      document.getElementById('t3-debarment').textContent = d.debarment;
+      document.getElementById('t3-digilocker').textContent = d.digilocker;
+
+      document.getElementById('score-num').textContent = d.score;
+      const riskTier = document.getElementById('risk-tier');
+      riskTier.textContent = d.risk;
+      riskTier.style.color = d.riskColor;
+
+      const gauge = document.getElementById('gauge');
+      gauge.style.setProperty('--score-pct', d.score);
+      gauge.style.background = `conic-gradient(${d.gaugeColor} calc(${d.score} * 1%), rgba(255, 255, 255, 0.08) 0)`;
+
+      const vb = document.getElementById('verdict-box');
+      vb.textContent = d.verdictText;
+      vb.className = 'verdict-box ' + d.verdictClass;
+    }
+  </script>
+</body>
+</html>
