@@ -5,7 +5,7 @@
   "description": "AI-powered integrated bid compliance verification platform for GeM procurement (SIH26100 - CPCL)",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "db:push": "prisma db push",
