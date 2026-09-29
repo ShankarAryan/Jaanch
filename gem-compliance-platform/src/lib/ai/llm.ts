@@ -62,8 +62,10 @@ export async function llmComplete(req: LlmRequest): Promise<string> {
 // allowance; Flash-Lite has a usable one (~1k requests/day) and is plenty
 // for structured extraction + a short summary. Override with GEMINI_MODEL
 const GEMINI_MODELS = [
-  process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite',
+  process.env.GEMINI_MODEL || 'gemini-2.5-flash',
   'gemini-flash-latest',
+  'gemini-2.5-flash-lite',
+  'gemini-3.1-flash-lite',
 ];
 
 async function geminiComplete({ prompt, file, maxTokens = 800, json }: LlmRequest): Promise<string> {
